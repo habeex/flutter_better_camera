@@ -266,14 +266,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   Widget _flashButton() {
     IconData iconData = Icons.flash_off;
     Color color = Colors.black;
-    if (flashMode == FlashMode.torch) {
+    if (flashMode == FlashMode.alwaysFlash) {
       iconData = Icons.flash_on;
       color = Colors.blue;
     } else if (flashMode == FlashMode.autoFlash) {
       iconData = Icons.flash_auto;
       color = Colors.red;
     }
-
     return IconButton(
       icon: Icon(iconData),
       color: color,
@@ -286,10 +285,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   /// Toggle Flash
   Future<void> _onFlashButtonPressed() async {
     bool hasFlash = false;
-    if (flashMode == FlashMode.off || flashMode == FlashMode.alwaysFlash) {
+    if (flashMode == FlashMode.off) {
       // Turn on the flash for capture
-      flashMode = FlashMode.torch;
-    } else if (flashMode == FlashMode.torch) {
+      flashMode = FlashMode.alwaysFlash;
+    } else if (flashMode == FlashMode.alwaysFlash || flashMode == FlashMode.torch) {
       // Turn on the flash for capture if needed
       flashMode = FlashMode.autoFlash;
     } else {
@@ -379,9 +378,19 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     });
   }
 
-  void onVideoRecordButtonPressed() {
+  void onVideoRecordButtonPressed() async{
+    // Apply the new mode
+    if(flashMode == FlashMode.alwaysFlash){
+      flashMode = FlashMode.torch;
+      await controller.setFlashMode(flashMode);
+      setState(() {});
+    }
+
     startVideoRecording().then((String filePath) {
-      if (mounted) setState(() {});
+      if (mounted) setState((){
+        // Change UI State
+        setState(() {});
+      });
       if (filePath != null) showInSnackBar('Saving video to $filePath');
     });
   }
