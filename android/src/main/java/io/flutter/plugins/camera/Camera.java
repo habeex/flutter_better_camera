@@ -166,6 +166,7 @@ public class Camera {
     // Check if the flash is supported.
     Boolean available = mCameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
     mFlashSupported = available == null ? false : available;
+    Log.d(Camera.TAG, "is flash supported" + available);
     //noinspection ConstantConditions
     sensorOrientation = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
     //noinspection ConstantConditions
@@ -215,6 +216,7 @@ public class Camera {
     mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
     mediaRecorder.setOutputFormat(recordingProfile.fileFormat);
     if (enableAudio) mediaRecorder.setAudioEncoder(recordingProfile.audioCodec);
+    if (enableAudio) mediaRecorder.setAudioEncodingBitRate(recordingProfile.audioBitRate);
     mediaRecorder.setVideoEncoder(recordingProfile.videoCodec);
     mediaRecorder.setVideoEncodingBitRate(recordingProfile.videoBitRate);
     if (enableAudio) mediaRecorder.setAudioSamplingRate(recordingProfile.audioSampleRate);
@@ -653,10 +655,10 @@ public class Camera {
                   CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
               mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, null);
 
-
               if (onSuccessCallback != null) {
                 onSuccessCallback.run();
               }
+
             } catch (CameraAccessException | IllegalStateException | IllegalArgumentException e) {
               dartMessenger.send(DartMessenger.EventType.ERROR, e.getMessage());
             }
@@ -735,6 +737,7 @@ public class Camera {
    */
   void updateFlash() {
     if(mFlashSupported) {
+      Log.d(Camera.TAG, "updateFlash builder" + mFlash);
       switch (mFlash) {
         case Constants.FLASH_OFF:
           mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
@@ -1109,5 +1112,13 @@ public class Camera {
             ? 0
             : (isFrontFacing) ? -currentOrientation : currentOrientation;
     return (sensorOrientationOffset + sensorOrientation + 360) % 360;
+  }
+
+  public boolean hasFlash() {
+    final Boolean hasFlash = mCameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+    if(hasFlash != null) {
+      return hasFlash;
+    }
+    return false;
   }
 }

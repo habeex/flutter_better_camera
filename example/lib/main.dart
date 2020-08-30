@@ -43,7 +43,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   VideoPlayerController videoController;
   VoidCallback videoPlayerListener;
   bool enableAudio = true;
-  FlashMode flashMode = FlashMode.off;
+  FlashMode flashMode = FlashMode.alwaysFlash;
 
   @override
   void initState() {
@@ -266,13 +266,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   Widget _flashButton() {
     IconData iconData = Icons.flash_off;
     Color color = Colors.black;
-    if (flashMode == FlashMode.alwaysFlash) {
+    if (flashMode == FlashMode.torch) {
       iconData = Icons.flash_on;
       color = Colors.blue;
     } else if (flashMode == FlashMode.autoFlash) {
       iconData = Icons.flash_auto;
       color = Colors.red;
     }
+
     return IconButton(
       icon: Icon(iconData),
       color: color,
@@ -285,10 +286,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   /// Toggle Flash
   Future<void> _onFlashButtonPressed() async {
     bool hasFlash = false;
-    if (flashMode == FlashMode.off || flashMode == FlashMode.torch) {
+    if (flashMode == FlashMode.off || flashMode == FlashMode.alwaysFlash) {
       // Turn on the flash for capture
-      flashMode = FlashMode.alwaysFlash;
-    } else if (flashMode == FlashMode.alwaysFlash) {
+      flashMode = FlashMode.torch;
+    } else if (flashMode == FlashMode.torch) {
       // Turn on the flash for capture if needed
       flashMode = FlashMode.autoFlash;
     } else {
@@ -343,6 +344,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       cameraDescription,
       ResolutionPreset.medium,
       enableAudio: enableAudio,
+      flashMode: flashMode
     );
 
     // If the controller is updated then update the UI.
